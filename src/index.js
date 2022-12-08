@@ -96,6 +96,10 @@ CordovaAuth.prototype.authorize = function (parameters, callback) {
     var url = client.buildAuthorizeUrl(params);
 
     session.start(function (sessionError, redirectUrl) {
+      console.log('sessionError ========== ');
+      console.log(sessionError);
+      console.log('redirectUrl ========== ');
+      console.log(redirectUrl);
       if (sessionError != null) {
         console.log(sessionError);
         callback(sessionError);
@@ -109,7 +113,9 @@ CordovaAuth.prototype.authorize = function (parameters, callback) {
         return true;
       }
       var response = parse(redirectUrl, true).query;
-      if (response.error) {
+      console.log('response ========== ');
+      console.log(response);
+      if (response && response.error) {
         callback(new Error(response.error_description || response.error));
         if (getOS() === 'ios') {
           agent.close();
