@@ -75,11 +75,6 @@ CordovaAuth.prototype.authorize = function (parameters, callback) {
   var self = this;
 
   getAgent(function (err, agent) {
-    console.log('get agent called ');
-    console.log('err ===== ');
-    console.log(err);
-    console.log('agent ===== ');
-    console.log(agent);
     if (err) {
       return callback(err);
     }
@@ -101,44 +96,30 @@ CordovaAuth.prototype.authorize = function (parameters, callback) {
     var url = client.buildAuthorizeUrl(params);
 
     session.start(function (sessionError, redirectUrl) {
-      console.log('sessionError ========== ');
       console.log(sessionError);
-      console.log('redirectUrl ========== ');
-      console.log(redirectUrl);
       if (sessionError != null) {
-        console.log(sessionError);
         callback(sessionError);
         return true;
       }
       if (redirectUrl.indexOf(redirectUri) === -1) {
-        console.log('if ===== 1');
         return false;
       }
       if (!redirectUrl || typeof redirectUrl !== 'string') {
-        console.log('if ===== 2');
         callback(new Error('url must be a string'));
         return true;
       }
       var response = parse(redirectUrl, true).query;
-      console.log('response ========== ');
-      console.log(response);
       if (response && response.error) {
-        console.log('if ===== 2');
         callback(new Error(response.error_description || response.error));
         if (getOS() === 'ios') {
-          console.log('if ===== 2 ===== a');
           agent.close();
         }
         return true;
       }
       var responseState = response.state;
       if (responseState !== requestState) {
-        console.log('if ===== 3');
+        console.log(requestState);
         callback(new Error('Response state does not match expected state'));
-        if (getOS() === 'ios') {
-          console.log('if ===== 3 ===== a');
-          agent.close();
-        }
         return true;
       }
       var code = response.code;
@@ -171,21 +152,17 @@ CordovaAuth.prototype.authorize = function (parameters, callback) {
       }
 
       if (result.event === 'closed') {
-        console.log('result.event closed ==== ');
         var handleClose = function () {
           if (session.isClosing) {
-            console.log('sessoin isClosing ==== ');
             session.clean();
-            return callback(new Error('User canceled'));
+            return callback(new Error('user canceled'));
           }
         };
 
         session.closing();
         if (getOS() === 'ios') {
-          console.log('4444444 ==== ');
           handleClose();
         } else {
-          console.log('55555 ==== ');
           setTimeout(handleClose, closingDelayMs);
           return;
         }
